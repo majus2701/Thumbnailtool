@@ -1,0 +1,2062 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>Wheel of Origin — Thumbnail Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #07070a;
+      --panel: #101015;
+      --panel-2: #15151d;
+      --line: rgba(224, 196, 135, .18);
+      --gold: #d8b76b;
+      --gold-soft: #f0d79b;
+      --violet: #9167e8;
+      --text: #f3efe7;
+      --muted: #96939d;
+      --danger: #ec7c81;
+      --success: #86d2a7;
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { min-height: 100%; }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 50% -20%, rgba(99, 65, 151, .18), transparent 45%),
+        var(--bg);
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button, input, select { font: inherit; }
+
+    button {
+      color: inherit;
+      border: 0;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: .42;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: minmax(280px, 340px) minmax(360px, 1fr) minmax(280px, 340px);
+      gap: 18px;
+      padding: 18px;
+    }
+
+    .panel {
+      background: linear-gradient(180deg, rgba(19, 19, 27, .98), rgba(12, 12, 17, .98));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, .26);
+    }
+
+    .sidebar {
+      align-self: start;
+      max-height: calc(100vh - 36px);
+      overflow: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #4a4059 transparent;
+    }
+
+    .brand {
+      padding: 22px 22px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .eyebrow {
+      color: var(--gold);
+      font-family: Cinzel, Georgia, serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 8px 0 7px;
+      font-family: Cinzel, Georgia, serif;
+      font-size: clamp(20px, 2vw, 28px);
+      font-weight: 600;
+      line-height: 1.08;
+    }
+
+    .brand p, .hint, .fine-print {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .version-badge {
+      display: inline-flex;
+      margin-top: 12px;
+      padding: 6px 9px;
+      border: 1px solid rgba(134, 210, 167, .3);
+      border-radius: 99px;
+      background: rgba(134, 210, 167, .08);
+      color: var(--success);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .04em;
+    }
+
+    .section {
+      padding: 20px 22px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .section:last-child { border-bottom: 0; }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 0 0 13px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .step {
+      width: 22px;
+      height: 22px;
+      display: inline-grid;
+      place-items: center;
+      margin-right: 8px;
+      border: 1px solid rgba(216, 183, 107, .38);
+      border-radius: 50%;
+      color: var(--gold-soft);
+      font-size: 10px;
+    }
+
+    .drop-zone {
+      min-height: 132px;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      border: 1px dashed rgba(216, 183, 107, .35);
+      border-radius: 14px;
+      background: rgba(216, 183, 107, .035);
+      text-align: center;
+      transition: .18s ease;
+    }
+
+    .drop-zone.dragover {
+      border-color: var(--violet);
+      background: rgba(145, 103, 232, .1);
+      transform: translateY(-1px);
+    }
+
+    .drop-icon {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 9px;
+      border: 1px solid rgba(216, 183, 107, .26);
+      border-radius: 50%;
+      color: var(--gold-soft);
+      font-size: 23px;
+    }
+
+    .drop-zone strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+
+    .file-name {
+      max-width: 100%;
+      margin-top: 10px;
+      overflow: hidden;
+      color: var(--gold-soft);
+      font-size: 11px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .btn {
+      min-height: 42px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 11px;
+      background: #22222b;
+      border: 1px solid rgba(255, 255, 255, .07);
+      font-size: 12px;
+      font-weight: 700;
+      transition: .16s ease;
+    }
+
+    .btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      background: #292934;
+    }
+
+    .btn.primary {
+      color: #14110b;
+      background: linear-gradient(135deg, #f0d79b, #b99045);
+      border-color: transparent;
+      box-shadow: 0 8px 26px rgba(216, 183, 107, .15);
+    }
+
+    .btn.primary:hover:not(:disabled) { background: linear-gradient(135deg, #f6e5ba, #c9a256); }
+
+    .btn.violet {
+      background: linear-gradient(135deg, #7650c5, #4b347c);
+      border-color: rgba(195, 168, 255, .2);
+    }
+
+    .btn.block { width: 100%; }
+
+    .button-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .status {
+      margin-top: 12px;
+      padding: 11px 12px;
+      border: 1px solid rgba(255, 255, 255, .06);
+      border-radius: 11px;
+      background: rgba(255, 255, 255, .025);
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    .status[data-state="success"] { color: var(--success); border-color: rgba(134, 210, 167, .2); }
+    .status[data-state="error"] { color: var(--danger); border-color: rgba(236, 124, 129, .2); }
+    .status[data-state="busy"] { color: #c8b6ec; border-color: rgba(145, 103, 232, .28); }
+
+    .progress {
+      height: 4px;
+      margin-top: 8px;
+      overflow: hidden;
+      border-radius: 99px;
+      background: rgba(255, 255, 255, .06);
+    }
+
+    .progress > span {
+      display: block;
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--violet), var(--gold));
+      transition: width .2s ease;
+    }
+
+    .workspace {
+      min-height: calc(100vh - 36px);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      align-items: center;
+      padding: 16px;
+      background:
+        linear-gradient(45deg, rgba(255,255,255,.018) 25%, transparent 25%, transparent 75%, rgba(255,255,255,.018) 75%),
+        linear-gradient(45deg, rgba(255,255,255,.018) 25%, transparent 25%, transparent 75%, rgba(255,255,255,.018) 75%),
+        #0c0c11;
+      background-position: 0 0, 12px 12px;
+      background-size: 24px 24px;
+    }
+
+    .workspace-top,
+    .workspace-bottom {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .workspace-top { padding: 2px 2px 12px; flex-wrap: wrap; }
+    .workspace-bottom { padding: 12px 2px 1px; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 9px;
+      border: 1px solid rgba(216, 183, 107, .2);
+      border-radius: 99px;
+      color: var(--gold-soft);
+      background: rgba(216, 183, 107, .05);
+    }
+
+    .preview-modes {
+      display: inline-flex;
+      gap: 4px;
+      padding: 4px;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 10px;
+      background: rgba(0,0,0,.24);
+    }
+
+    .preview-mode {
+      padding: 6px 9px;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .preview-mode.active {
+      background: rgba(145, 103, 232, .2);
+      color: var(--gold-soft);
+      box-shadow: inset 0 0 0 1px rgba(216, 183, 107, .18);
+    }
+
+    .canvas-shell {
+      position: relative;
+      width: min(100%, calc((100vh - 150px) * 9 / 16));
+      justify-self: center;
+      overflow: hidden;
+      aspect-ratio: 9 / 16;
+      border: 1px solid rgba(216, 183, 107, .24);
+      border-radius: 5px;
+      background: #050508;
+      box-shadow: 0 28px 80px rgba(0, 0, 0, .5);
+      touch-action: none;
+    }
+
+    .canvas-shell.profile-square {
+      width: min(100%, calc(100vh - 150px));
+      aspect-ratio: 1 / 1;
+    }
+
+    .canvas-shell.profile-tall {
+      width: min(100%, calc((100vh - 150px) * 3 / 4));
+      aspect-ratio: 3 / 4;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: auto;
+      display: block;
+      cursor: grab;
+    }
+
+    .canvas-shell.profile-square canvas { transform: translateY(-21.875%); }
+    .canvas-shell.profile-tall canvas { transform: translateY(-12.5%); }
+    .canvas-shell.cover-preview canvas { height: 100%; transform: none; }
+
+    .canvas-shell.cover-preview::before,
+    .canvas-shell.cover-preview::after {
+      content: "";
+      position: absolute;
+      z-index: 2;
+      left: 0;
+      width: 100%;
+      height: 21.875%;
+      pointer-events: none;
+      background: rgba(0,0,0,.24);
+      border-color: rgba(240,215,155,.35);
+    }
+
+    .canvas-shell.cover-preview::before { top: 0; border-bottom: 1px dashed rgba(240,215,155,.35); }
+    .canvas-shell.cover-preview::after { bottom: 0; border-top: 1px dashed rgba(240,215,155,.35); }
+
+    canvas.dragging { cursor: grabbing; }
+
+    .empty-note {
+      position: absolute;
+      left: 50%;
+      bottom: 13%;
+      z-index: 3;
+      width: 74%;
+      padding: 10px 14px;
+      transform: translateX(-50%);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 99px;
+      background: rgba(5, 5, 8, .74);
+      color: rgba(255,255,255,.65);
+      font-size: 10px;
+      text-align: center;
+      backdrop-filter: blur(8px);
+      pointer-events: none;
+    }
+
+    .empty-note.hidden { display: none; }
+
+    .variant-grid {
+      display: grid;
+      gap: 8px;
+    }
+
+    .variant {
+      position: relative;
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      gap: 11px;
+      align-items: center;
+      width: 100%;
+      padding: 10px;
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 12px;
+      background: rgba(255,255,255,.025);
+      text-align: left;
+    }
+
+    .variant:hover { background: rgba(255,255,255,.045); }
+
+    .variant.active {
+      border-color: rgba(216, 183, 107, .43);
+      background: linear-gradient(90deg, rgba(216,183,107,.095), rgba(145,103,232,.045));
+    }
+
+    .variant-swatch {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border-radius: 9px;
+      background: radial-gradient(circle at 50% 40%, #7153b4, #17121f 55%, #08080b 56%);
+      color: #050507;
+      font-size: 25px;
+      text-shadow: 0 0 8px #c5a2ff;
+    }
+
+    .variant:nth-child(2) .variant-swatch { background: radial-gradient(circle, #32263e, #08080b 64%); }
+    .variant:nth-child(3) .variant-swatch { background: radial-gradient(circle, #c29a4b 0 35%, #251a15 36% 52%, #08080b 53%); }
+    .variant:nth-child(4) .variant-swatch { background: linear-gradient(180deg, #3e2e59, #08080b 65%); }
+    .variant:nth-child(5) .variant-swatch { background: #08080b; color: #9b6cff; }
+
+    .variant strong {
+      display: block;
+      margin-bottom: 3px;
+      font-size: 12px;
+    }
+
+    .variant small {
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.35;
+    }
+
+    .control { margin-top: 14px; }
+    .control:first-child { margin-top: 0; }
+
+    .control-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 7px;
+      color: #c8c4cc;
+      font-size: 11px;
+    }
+
+    .control-value {
+      min-width: 42px;
+      color: var(--gold-soft);
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 4px;
+      appearance: none;
+      border-radius: 99px;
+      outline: 0;
+      background: linear-gradient(90deg, #5e448c, #c9a95f);
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      width: 16px;
+      height: 16px;
+      appearance: none;
+      border: 2px solid #d9c28e;
+      border-radius: 50%;
+      background: #17151d;
+      box-shadow: 0 2px 8px rgba(0,0,0,.45);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 13px;
+      height: 13px;
+      border: 2px solid #d9c28e;
+      border-radius: 50%;
+      background: #17151d;
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+    }
+
+    .segmented button {
+      min-height: 34px;
+      padding: 7px 5px;
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 9px;
+      background: rgba(255,255,255,.035);
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .segmented button:hover { color: var(--text); background: rgba(255,255,255,.065); }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 13px;
+      color: #c8c4cc;
+      font-size: 11px;
+    }
+
+    .switch {
+      position: relative;
+      width: 38px;
+      height: 22px;
+      flex: 0 0 auto;
+    }
+
+    .switch input { position: absolute; opacity: 0; }
+
+    .switch span {
+      position: absolute;
+      inset: 0;
+      border-radius: 99px;
+      background: #292833;
+      transition: .18s ease;
+    }
+
+    .switch span::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #aaa6b0;
+      transition: .18s ease;
+    }
+
+    .switch input:checked + span { background: #7152aa; }
+    .switch input:checked + span::after { left: 19px; background: #f0d79b; }
+
+    .eye-controls { display: none; }
+    .eye-controls.visible { display: block; }
+
+    .eye-card {
+      margin-top: 14px;
+      padding: 13px;
+      border: 1px solid rgba(216, 183, 107, .13);
+      border-radius: 13px;
+      background: rgba(255,255,255,.025);
+    }
+
+    .eye-card-title {
+      margin: 0 0 12px;
+      color: var(--gold-soft);
+      font-family: Cinzel, Georgia, serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .eye-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 13px 12px;
+    }
+
+    .eye-grid .control { margin-top: 0; }
+
+    .color-row {
+      display: grid;
+      grid-template-columns: 52px 1fr;
+      gap: 10px;
+      align-items: center;
+    }
+
+    input[type="color"] {
+      width: 52px;
+      height: 40px;
+      padding: 3px;
+      border: 1px solid rgba(216, 183, 107, .28);
+      border-radius: 10px;
+      background: #17151d;
+      cursor: pointer;
+    }
+
+    .color-presets {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 6px;
+    }
+
+    .color-preset {
+      position: relative;
+      aspect-ratio: 1;
+      min-width: 0;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 50%;
+      background: var(--eye-color);
+      box-shadow: 0 0 12px color-mix(in srgb, var(--eye-color) 60%, transparent);
+    }
+
+    .color-preset.active::after {
+      content: "";
+      position: absolute;
+      inset: -4px;
+      border: 1px solid var(--gold-soft);
+      border-radius: 50%;
+    }
+
+    .export-card {
+      padding: 18px 22px 22px;
+      background: linear-gradient(180deg, rgba(145, 103, 232, .055), transparent);
+    }
+
+    .export-card .btn { min-height: 48px; font-size: 13px; }
+
+    .license {
+      padding: 0 22px 18px;
+      color: #696672;
+      font-size: 9px;
+      line-height: 1.45;
+    }
+
+    .license a { color: #85808e; }
+
+    @media (max-width: 1120px) {
+      .app { grid-template-columns: 300px minmax(340px, 1fr); }
+      .right-panel { grid-column: 1 / -1; max-height: none; }
+      .right-panel .section-wrap { display: grid; grid-template-columns: 1fr 1fr; }
+      .right-panel .section-wrap > .section { border-right: 1px solid var(--line); }
+    }
+
+    @media (max-width: 760px) {
+      .app { display: flex; flex-direction: column; padding: 10px; }
+      .sidebar { max-height: none; }
+      .workspace { min-height: auto; order: -1; }
+      .canvas-shell { width: min(100%, calc(72vh * 9 / 16)); }
+      .canvas-shell.profile-square { width: min(100%, 72vh); }
+      .canvas-shell.profile-tall { width: min(100%, calc(72vh * 3 / 4)); }
+      .right-panel .section-wrap { display: block; }
+      .right-panel .section-wrap > .section { border-right: 0; }
+      .preview-modes { order: 3; width: 100%; }
+      .preview-mode { flex: 1; }
+      .eye-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <aside class="panel sidebar">
+      <header class="brand">
+        <div class="eyebrow">Season 2 Creator</div>
+        <h1>Thumbnail Studio</h1>
+        <p>Aus einem normalen Charakterbild wird automatisch ein geheimnisvolles Wheel-of-Origin-Cover.</p>
+        <div class="version-badge">V2.1 · Einzelaugen + Rastervorschau</div>
+      </header>
+
+      <section class="section">
+        <h2 class="section-title"><span><span class="step">1</span>Charakter laden</span></h2>
+        <label class="drop-zone" id="dropZone" for="fileInput">
+          <span>
+            <span class="drop-icon">＋</span>
+            <strong>Bild auswählen oder hier ablegen</strong>
+            <span class="hint">JPG, PNG oder WebP · Ganzkörperbilder funktionieren</span>
+            <span class="file-name" id="fileName"></span>
+          </span>
+        </label>
+        <input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp" hidden />
+
+        <button class="btn violet block" id="removeBgBtn" type="button" disabled style="margin-top:10px">
+          <span>✦</span> Automatisch freistellen
+        </button>
+        <div class="status" id="statusBox" data-state="idle">
+          Lade ein Bild hoch. Transparente PNGs werden sofort erkannt.
+          <div class="progress" id="progressWrap" hidden><span id="progressBar"></span></div>
+        </div>
+        <p class="fine-print" style="margin-top:9px">Die Freistellung läuft auf deinem Gerät. Beim ersten Mal werden dafür Modelldaten geladen; das kann etwas dauern.</p>
+      </section>
+
+      <section class="section">
+        <h2 class="section-title"><span><span class="step">2</span>Ausschnitt</span></h2>
+        <div class="segmented" aria-label="Ausschnitt-Presets">
+          <button type="button" data-focus="full">Ganzkörper</button>
+          <button type="button" data-focus="bust">Oberkörper</button>
+          <button type="button" data-focus="close">Close-up</button>
+        </div>
+
+        <div class="control">
+          <div class="control-head"><span>Größe</span><span class="control-value" id="scaleValue">100%</span></div>
+          <input id="scaleRange" type="range" min="45" max="240" value="100" />
+        </div>
+        <div class="control">
+          <div class="control-head"><span>Horizontal</span><span class="control-value" id="xValue">0</span></div>
+          <input id="xRange" type="range" min="-540" max="540" value="0" />
+        </div>
+        <div class="control">
+          <div class="control-head"><span>Vertikal</span><span class="control-value" id="yValue">0</span></div>
+          <input id="yRange" type="range" min="-700" max="700" value="0" />
+        </div>
+
+        <div class="button-row">
+          <button class="btn" id="resetPositionBtn" type="button">Position zurück</button>
+          <button class="btn" id="resetAllBtn" type="button">Neues Bild</button>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2 class="section-title"><span><span class="step">3</span>Kanten</span></h2>
+        <div class="control">
+          <div class="control-head"><span>Hintergrundreste entfernen</span><span class="control-value" id="edgeValue">12</span></div>
+          <input id="edgeRange" type="range" min="0" max="90" value="12" />
+        </div>
+        <div class="control">
+          <div class="control-head"><span>Kantenweichheit</span><span class="control-value" id="softValue">18</span></div>
+          <input id="softRange" type="range" min="1" max="70" value="18" />
+        </div>
+        <p class="fine-print" style="margin-top:10px">Erhöhe „Hintergrundreste“, wenn nach dem Freistellen noch ein heller Saum sichtbar ist.</p>
+      </section>
+    </aside>
+
+    <section class="panel workspace" aria-label="Thumbnail-Vorschau">
+      <div class="workspace-top">
+        <span class="badge" id="previewBadge">Profilraster · 1:1 Vorschau</span>
+        <div class="preview-modes" aria-label="Vorschauformat wählen">
+          <button class="preview-mode active" type="button" data-preview="square" aria-pressed="true">1:1 Raster</button>
+          <button class="preview-mode" type="button" data-preview="tall" aria-pressed="false">3:4 Raster</button>
+          <button class="preview-mode" type="button" data-preview="cover" aria-pressed="false">9:16 Cover</button>
+        </div>
+        <span>Export immer 1080 × 1920 px</span>
+      </div>
+
+      <div class="canvas-shell profile-square" id="canvasShell">
+        <canvas id="posterCanvas" width="1080" height="1920" aria-label="Thumbnail-Vorschau"></canvas>
+        <div class="empty-note" id="emptyNote">Beispiel-Silhouette · Lade links deinen Charakter hoch</div>
+      </div>
+
+      <div class="workspace-bottom">
+        <span>Ziehen zum Verschieben · Mausrad zum Zoomen</span>
+        <span>Pfeiltasten für Feinarbeit</span>
+      </div>
+    </section>
+
+    <aside class="panel sidebar right-panel">
+      <div class="section-wrap">
+        <section class="section">
+          <h2 class="section-title"><span><span class="step">4</span>Stil wählen</span></h2>
+          <div class="variant-grid" id="variantGrid">
+            <button class="variant active" type="button" data-variant="arcane">
+              <span class="variant-swatch">♟</span>
+              <span><strong>Arcane Premium</strong><small>Der hochwertige Referenz-Look mit Portal und Rimlight</small></span>
+            </button>
+            <button class="variant" type="button" data-variant="shadow">
+              <span class="variant-swatch">♟</span>
+              <span><strong>Pure Shadow</strong><small>Minimal, dunkel und maximal geheimnisvoll</small></span>
+            </button>
+            <button class="variant" type="button" data-variant="eclipse">
+              <span class="variant-swatch">♟</span>
+              <span><strong>Golden Eclipse</strong><small>Goldene Scheibe hinter der schwarzen Figur</small></span>
+            </button>
+            <button class="variant" type="button" data-variant="veiled">
+              <span class="variant-swatch">♟</span>
+              <span><strong>Veiled in Fog</strong><small>Unterkörper verschwindet in violettem Nebel</small></span>
+            </button>
+            <button class="variant" type="button" data-variant="eyes">
+              <span class="variant-swatch">••</span>
+              <span><strong>Glowing Eyes</strong><small>Silhouette mit separat einstellbaren Augen</small></span>
+            </button>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2 class="section-title"><span>Feinabstimmung</span></h2>
+          <div class="control">
+            <div class="control-head"><span>Leuchtstärke</span><span class="control-value" id="glowValue">65%</span></div>
+            <input id="glowRange" type="range" min="0" max="100" value="65" />
+          </div>
+          <div class="control">
+            <div class="control-head"><span>Wheel-Größe</span><span class="control-value" id="wheelValue">100%</span></div>
+            <input id="wheelRange" type="range" min="75" max="135" value="100" />
+          </div>
+
+          <div class="toggle-row">
+            <span>Leuchtende Augen</span>
+            <label class="switch">
+              <input id="eyesToggle" type="checkbox" />
+              <span></span>
+            </label>
+          </div>
+
+          <div class="eye-controls" id="eyeControls">
+            <div class="control">
+              <div class="control-head"><span>Augenpaar horizontal</span><span class="control-value" id="eyeXValue">0</span></div>
+              <input id="eyeXRange" type="range" min="-160" max="160" value="0" />
+            </div>
+            <div class="control">
+              <div class="control-head"><span>Augenpaar vertikal</span><span class="control-value" id="eyeYValue">15%</span></div>
+              <input id="eyeYRange" type="range" min="5" max="38" value="15" />
+            </div>
+            <div class="control">
+              <div class="control-head"><span>Augenabstand</span><span class="control-value" id="eyeGapValue">8%</span></div>
+              <input id="eyeGapRange" type="range" min="2" max="22" value="8" />
+            </div>
+
+            <div class="eye-card">
+              <h3 class="eye-card-title">Linkes Auge im Bild</h3>
+              <div class="eye-grid">
+                <div class="control">
+                  <div class="control-head"><span>X-Korrektur</span><span class="control-value" id="leftEyeXValue">0</span></div>
+                  <input id="leftEyeXRange" type="range" min="-140" max="140" value="0" />
+                </div>
+                <div class="control">
+                  <div class="control-head"><span>Y-Korrektur</span><span class="control-value" id="leftEyeYValue">0</span></div>
+                  <input id="leftEyeYRange" type="range" min="-140" max="140" value="0" />
+                </div>
+                <div class="control">
+                  <div class="control-head"><span>Größe</span><span class="control-value" id="leftEyeSizeValue">100%</span></div>
+                  <input id="leftEyeSizeRange" type="range" min="35" max="250" value="100" />
+                </div>
+                <div class="control">
+                  <div class="control-head"><span>Leuchten</span><span class="control-value" id="leftEyeGlowValue">100%</span></div>
+                  <input id="leftEyeGlowRange" type="range" min="0" max="200" value="100" />
+                </div>
+              </div>
+              <div class="control">
+                <div class="control-head"><span>Farbe</span><span class="control-value" id="leftEyeColorValue">#9B6CFF</span></div>
+                <div class="color-row">
+                  <input id="leftEyeColorInput" type="color" value="#9b6cff" aria-label="Farbe des linken Auges frei wählen" />
+                  <div class="color-presets" aria-label="Farben für das linke Auge">
+                    <button class="color-preset active" type="button" data-eye="left" data-eye-color="#9b6cff" style="--eye-color:#9b6cff" aria-label="Violett"></button>
+                    <button class="color-preset" type="button" data-eye="left" data-eye-color="#ff4fd8" style="--eye-color:#ff4fd8" aria-label="Magenta"></button>
+                    <button class="color-preset" type="button" data-eye="left" data-eye-color="#ff3b45" style="--eye-color:#ff3b45" aria-label="Rot"></button>
+                    <button class="color-preset" type="button" data-eye="left" data-eye-color="#ffd05a" style="--eye-color:#ffd05a" aria-label="Gold"></button>
+                    <button class="color-preset" type="button" data-eye="left" data-eye-color="#50e58b" style="--eye-color:#50e58b" aria-label="Grün"></button>
+                    <button class="color-preset" type="button" data-eye="left" data-eye-color="#42e8ef" style="--eye-color:#42e8ef" aria-label="Türkis"></button>
+                    <button class="color-preset" type="button" data-eye="left" data-eye-color="#3da5ff" style="--eye-color:#3da5ff" aria-label="Blau"></button>
+                    <button class="color-preset" type="button" data-eye="left" data-eye-color="#f5f3ff" style="--eye-color:#f5f3ff" aria-label="Weiß"></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="eye-card">
+              <h3 class="eye-card-title">Rechtes Auge im Bild</h3>
+              <div class="eye-grid">
+                <div class="control">
+                  <div class="control-head"><span>X-Korrektur</span><span class="control-value" id="rightEyeXValue">0</span></div>
+                  <input id="rightEyeXRange" type="range" min="-140" max="140" value="0" />
+                </div>
+                <div class="control">
+                  <div class="control-head"><span>Y-Korrektur</span><span class="control-value" id="rightEyeYValue">0</span></div>
+                  <input id="rightEyeYRange" type="range" min="-140" max="140" value="0" />
+                </div>
+                <div class="control">
+                  <div class="control-head"><span>Größe</span><span class="control-value" id="rightEyeSizeValue">100%</span></div>
+                  <input id="rightEyeSizeRange" type="range" min="35" max="250" value="100" />
+                </div>
+                <div class="control">
+                  <div class="control-head"><span>Leuchten</span><span class="control-value" id="rightEyeGlowValue">100%</span></div>
+                  <input id="rightEyeGlowRange" type="range" min="0" max="200" value="100" />
+                </div>
+              </div>
+              <div class="control">
+                <div class="control-head"><span>Farbe</span><span class="control-value" id="rightEyeColorValue">#9B6CFF</span></div>
+                <div class="color-row">
+                  <input id="rightEyeColorInput" type="color" value="#9b6cff" aria-label="Farbe des rechten Auges frei wählen" />
+                  <div class="color-presets" aria-label="Farben für das rechte Auge">
+                    <button class="color-preset active" type="button" data-eye="right" data-eye-color="#9b6cff" style="--eye-color:#9b6cff" aria-label="Violett"></button>
+                    <button class="color-preset" type="button" data-eye="right" data-eye-color="#ff4fd8" style="--eye-color:#ff4fd8" aria-label="Magenta"></button>
+                    <button class="color-preset" type="button" data-eye="right" data-eye-color="#ff3b45" style="--eye-color:#ff3b45" aria-label="Rot"></button>
+                    <button class="color-preset" type="button" data-eye="right" data-eye-color="#ffd05a" style="--eye-color:#ffd05a" aria-label="Gold"></button>
+                    <button class="color-preset" type="button" data-eye="right" data-eye-color="#50e58b" style="--eye-color:#50e58b" aria-label="Grün"></button>
+                    <button class="color-preset" type="button" data-eye="right" data-eye-color="#42e8ef" style="--eye-color:#42e8ef" aria-label="Türkis"></button>
+                    <button class="color-preset" type="button" data-eye="right" data-eye-color="#3da5ff" style="--eye-color:#3da5ff" aria-label="Blau"></button>
+                    <button class="color-preset" type="button" data-eye="right" data-eye-color="#f5f3ff" style="--eye-color:#f5f3ff" aria-label="Weiß"></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="export-card">
+        <button class="btn primary block" id="exportBtn" type="button" disabled>PNG herunterladen</button>
+        <p class="fine-print" style="margin-top:10px">Der Export bleibt TikTok-kompatibel in 9:16. Die Rastervorschau zeigt den mittleren Ausschnitt deines Profils.</p>
+      </div>
+      <div class="license">
+        Automatische Freistellung mit <a href="https://github.com/imgly/background-removal-js" target="_blank" rel="noreferrer">@imgly/background-removal</a> (AGPL-3.0). Für die Freistellung ist eine Internetverbindung erforderlich.
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const W = 1080;
+      const H = 1920;
+      const canvas = document.getElementById('posterCanvas');
+      const ctx = canvas.getContext('2d', { alpha: false });
+      const PREMIUM_BACKGROUND_SRC = 'arcane-premium-background.png';
+      const PREMIUM_WHEEL_SRC = 'arcane-premium-wheel.png';
+
+      const premiumAssets = {
+        background: null,
+        wheel: null,
+        ready: false,
+      };
+
+      const els = {
+        fileInput: document.getElementById('fileInput'),
+        dropZone: document.getElementById('dropZone'),
+        fileName: document.getElementById('fileName'),
+        removeBgBtn: document.getElementById('removeBgBtn'),
+        statusBox: document.getElementById('statusBox'),
+        progressWrap: document.getElementById('progressWrap'),
+        progressBar: document.getElementById('progressBar'),
+        emptyNote: document.getElementById('emptyNote'),
+        exportBtn: document.getElementById('exportBtn'),
+        canvasShell: document.getElementById('canvasShell'),
+        previewBadge: document.getElementById('previewBadge'),
+        scaleRange: document.getElementById('scaleRange'),
+        xRange: document.getElementById('xRange'),
+        yRange: document.getElementById('yRange'),
+        edgeRange: document.getElementById('edgeRange'),
+        softRange: document.getElementById('softRange'),
+        glowRange: document.getElementById('glowRange'),
+        wheelRange: document.getElementById('wheelRange'),
+        eyesToggle: document.getElementById('eyesToggle'),
+        eyeControls: document.getElementById('eyeControls'),
+        eyeXRange: document.getElementById('eyeXRange'),
+        eyeYRange: document.getElementById('eyeYRange'),
+        eyeGapRange: document.getElementById('eyeGapRange'),
+        leftEyeXRange: document.getElementById('leftEyeXRange'),
+        leftEyeYRange: document.getElementById('leftEyeYRange'),
+        leftEyeSizeRange: document.getElementById('leftEyeSizeRange'),
+        leftEyeGlowRange: document.getElementById('leftEyeGlowRange'),
+        leftEyeColorInput: document.getElementById('leftEyeColorInput'),
+        rightEyeXRange: document.getElementById('rightEyeXRange'),
+        rightEyeYRange: document.getElementById('rightEyeYRange'),
+        rightEyeSizeRange: document.getElementById('rightEyeSizeRange'),
+        rightEyeGlowRange: document.getElementById('rightEyeGlowRange'),
+        rightEyeColorInput: document.getElementById('rightEyeColorInput'),
+        resetPositionBtn: document.getElementById('resetPositionBtn'),
+        resetAllBtn: document.getElementById('resetAllBtn'),
+      };
+
+      const state = {
+        variant: 'arcane',
+        preview: 'square',
+        sourceFile: null,
+        sourceImage: null,
+        subjectCanvas: null,
+        processedCanvas: null,
+        ready: false,
+        processing: false,
+        baseHeight: 1300,
+        scale: 1,
+        offsetX: 0,
+        offsetY: 0,
+        edge: 12,
+        softness: 18,
+        glow: .65,
+        wheelScale: 1,
+        eyes: false,
+        eyeX: 0,
+        eyeY: .15,
+        eyeGap: .08,
+        leftEyeX: 0,
+        leftEyeY: 0,
+        leftEyeSize: 1,
+        leftEyeGlow: 1,
+        leftEyeColor: '#9b6cff',
+        rightEyeX: 0,
+        rightEyeY: 0,
+        rightEyeSize: 1,
+        rightEyeGlow: 1,
+        rightEyeColor: '#9b6cff',
+      };
+
+      const variantConfig = {
+        arcane: { wheelY: 2200, wheelR: 750, ring: 'premium', glow: '#8d5de4', accent: '#d7b667' },
+        shadow: { wheelY: 2250, wheelR: 700, ring: 'none', glow: '#503b74', accent: '#a6854d' },
+        eclipse: { wheelY: 2200, wheelR: 770, ring: 'eclipse', glow: '#c2994f', accent: '#e1c57f' },
+        veiled: { wheelY: 2220, wheelR: 780, ring: 'veil', glow: '#7654b8', accent: '#c2a25c' },
+        eyes: { wheelY: 2240, wheelR: 735, ring: 'dim', glow: '#8c5df0', accent: '#d1af63' },
+      };
+
+      const palette = [
+        { color: '#77777d', weight: .28 },
+        { color: '#1f6b3a', weight: .30 },
+        { color: '#285ba0', weight: .20 },
+        { color: '#75379a', weight: .10 },
+        { color: '#c49326', weight: .08 },
+        { color: '#9f252b', weight: .04 },
+      ];
+
+      const particles = (() => {
+        let seed = 72631;
+        const rand = () => {
+          seed = (seed * 16807) % 2147483647;
+          return (seed - 1) / 2147483646;
+        };
+        return Array.from({ length: 115 }, () => ({
+          x: rand() * W,
+          y: 160 + rand() * 1510,
+          r: .7 + rand() * 2.4,
+          a: .08 + rand() * .38,
+          warm: rand() > .66,
+        }));
+      })();
+
+      const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+      const lerp = (a, b, t) => a + (b - a) * t;
+      const smoothstep = (a, b, v) => {
+        const t = clamp((v - a) / Math.max(.0001, b - a), 0, 1);
+        return t * t * (3 - 2 * t);
+      };
+
+      function setStatus(message, type = 'idle', progress = null) {
+        els.statusBox.firstChild.textContent = message + ' ';
+        els.statusBox.dataset.state = type;
+        if (progress === null) {
+          els.progressWrap.hidden = true;
+        } else {
+          els.progressWrap.hidden = false;
+          els.progressBar.style.width = `${clamp(progress, 0, 100)}%`;
+        }
+      }
+
+      function loadImage(source) {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = () => reject(new Error('Das Bild konnte nicht gelesen werden.'));
+          img.src = source;
+        });
+      }
+
+      function trimTransparentImage(image, alphaThreshold = 16) {
+        const source = document.createElement('canvas');
+        source.width = image.naturalWidth || image.width;
+        source.height = image.naturalHeight || image.height;
+        const sourceCtx = source.getContext('2d', { willReadFrequently: true });
+        sourceCtx.drawImage(image, 0, 0);
+        const pixels = sourceCtx.getImageData(0, 0, source.width, source.height).data;
+        let minX = source.width;
+        let minY = source.height;
+        let maxX = -1;
+        let maxY = -1;
+
+        for (let y = 0; y < source.height; y++) {
+          for (let x = 0; x < source.width; x++) {
+            if (pixels[(y * source.width + x) * 4 + 3] > alphaThreshold) {
+              minX = Math.min(minX, x);
+              minY = Math.min(minY, y);
+              maxX = Math.max(maxX, x);
+              maxY = Math.max(maxY, y);
+            }
+          }
+        }
+
+        if (maxX < minX || maxY < minY) return source;
+        const out = document.createElement('canvas');
+        out.width = maxX - minX + 1;
+        out.height = maxY - minY + 1;
+        out.getContext('2d').drawImage(
+          source,
+          minX, minY, out.width, out.height,
+          0, 0, out.width, out.height,
+        );
+        return out;
+      }
+
+      async function loadPremiumAssets() {
+        try {
+          const [background, wheel] = await Promise.all([
+            loadImage(PREMIUM_BACKGROUND_SRC),
+            loadImage(PREMIUM_WHEEL_SRC),
+          ]);
+          premiumAssets.background = background;
+          premiumAssets.wheel = trimTransparentImage(wheel);
+          premiumAssets.ready = true;
+          draw();
+        } catch (error) {
+          console.error('Premium assets could not be loaded.', error);
+        }
+      }
+
+      function drawSpacedText(context, text, x, y, spacing) {
+        const chars = [...text];
+        const widths = chars.map(char => context.measureText(char).width);
+        const total = widths.reduce((sum, width) => sum + width, 0) + spacing * (chars.length - 1);
+        let cursor = x - total / 2;
+        chars.forEach((char, index) => {
+          context.fillText(char, cursor, y);
+          cursor += widths[index] + spacing;
+        });
+      }
+
+      function drawBackground(config) {
+        const base = ctx.createLinearGradient(0, 0, 0, H);
+        base.addColorStop(0, '#050508');
+        base.addColorStop(.44, state.variant === 'eclipse' ? '#15100f' : '#0d0912');
+        base.addColorStop(1, '#040406');
+        ctx.fillStyle = base;
+        ctx.fillRect(0, 0, W, H);
+
+        if (premiumAssets.background) {
+          ctx.drawImage(premiumAssets.background, 0, 0, W, H);
+
+          ctx.save();
+          if (state.variant === 'shadow' || state.variant === 'eyes') {
+            ctx.fillStyle = state.variant === 'shadow' ? 'rgba(0,0,0,.34)' : 'rgba(4,0,10,.22)';
+            ctx.fillRect(0, 0, W, H);
+          } else if (state.variant === 'eclipse') {
+            ctx.globalCompositeOperation = 'color';
+            ctx.fillStyle = 'rgba(169, 104, 42, .24)';
+            ctx.fillRect(0, 0, W, H);
+          } else if (state.variant === 'veiled') {
+            ctx.globalCompositeOperation = 'screen';
+            const veilTone = ctx.createLinearGradient(0, 300, 0, 1600);
+            veilTone.addColorStop(0, 'rgba(95,55,150,.06)');
+            veilTone.addColorStop(1, 'rgba(113,71,164,.17)');
+            ctx.fillStyle = veilTone;
+            ctx.fillRect(0, 0, W, H);
+          }
+          ctx.restore();
+        }
+
+        const aura = ctx.createRadialGradient(W / 2, 780, 40, W / 2, 780, 650);
+        if (state.variant === 'eclipse') {
+          aura.addColorStop(0, 'rgba(184, 132, 48, .23)');
+          aura.addColorStop(.45, 'rgba(97, 55, 36, .09)');
+        } else {
+          aura.addColorStop(0, `rgba(112, 69, 174, ${.13 + state.glow * .14})`);
+          aura.addColorStop(.5, 'rgba(72, 42, 110, .06)');
+        }
+        aura.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = aura;
+        ctx.fillRect(0, 0, W, H);
+
+        ctx.save();
+        particles.forEach(p => {
+          ctx.globalAlpha = p.a * (.45 + state.glow * .55);
+          ctx.fillStyle = p.warm ? '#d5a65b' : '#9670d3';
+          ctx.shadowColor = ctx.fillStyle;
+          ctx.shadowBlur = p.r * 4;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        ctx.restore();
+
+        const vignette = ctx.createRadialGradient(W / 2, 790, 260, W / 2, 870, 1040);
+        vignette.addColorStop(0, 'rgba(0,0,0,0)');
+        vignette.addColorStop(.73, 'rgba(0,0,0,.22)');
+        vignette.addColorStop(1, 'rgba(0,0,0,.86)');
+        ctx.fillStyle = vignette;
+        ctx.fillRect(0, 0, W, H);
+      }
+
+      function drawArcaneRing(config) {
+        if (config.ring === 'none' || config.ring === 'premium') return;
+        const x = W / 2;
+        const y = state.variant === 'veiled' ? 790 : 760;
+        const intensity = .25 + state.glow * .58;
+
+        ctx.save();
+        if (config.ring === 'eclipse') {
+          const disk = ctx.createRadialGradient(x - 40, y - 60, 10, x, y, 350);
+          disk.addColorStop(0, `rgba(244, 211, 137, ${.42 * intensity})`);
+          disk.addColorStop(.54, `rgba(177, 119, 39, ${.55 * intensity})`);
+          disk.addColorStop(.57, `rgba(59, 31, 22, ${.68 * intensity})`);
+          disk.addColorStop(.75, 'rgba(27, 17, 19, .42)');
+          disk.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = disk;
+          ctx.beginPath();
+          ctx.arc(x, y, 430, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = `rgba(231, 197, 119, ${.56 * intensity})`;
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.arc(x, y, 346, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.restore();
+          return;
+        }
+
+        const radius = config.ring === 'dim' ? 320 : 390;
+        ctx.translate(x, y);
+        ctx.strokeStyle = `rgba(158, 105, 233, ${.42 * intensity})`;
+        ctx.shadowColor = config.glow;
+        ctx.shadowBlur = 24 * state.glow;
+        ctx.lineWidth = 3;
+        [radius, radius - 23, radius - 78].forEach((r, i) => {
+          ctx.globalAlpha = 1 - i * .18;
+          ctx.beginPath();
+          ctx.arc(0, 0, r, 0, Math.PI * 2);
+          ctx.stroke();
+        });
+
+        ctx.globalAlpha = .6 * intensity;
+        ctx.lineWidth = 2;
+        for (let i = 0; i < 18; i++) {
+          const angle = i * Math.PI * 2 / 18;
+          const r1 = radius - 62;
+          const r2 = radius - (i % 2 ? 12 : 28);
+          ctx.beginPath();
+          ctx.moveTo(Math.cos(angle) * r1, Math.sin(angle) * r1);
+          ctx.lineTo(Math.cos(angle) * r2, Math.sin(angle) * r2);
+          ctx.stroke();
+        }
+
+        ctx.rotate(Math.PI / 4);
+        ctx.strokeStyle = `rgba(216, 183, 107, ${.32 * intensity})`;
+        ctx.strokeRect(-228, -228, 456, 456);
+        ctx.restore();
+      }
+
+      function drawPlaceholderSilhouette() {
+        const config = variantConfig[state.variant];
+        ctx.save();
+        ctx.translate(W / 2, 1100);
+        ctx.shadowColor = config.glow;
+        ctx.shadowBlur = 38 * state.glow;
+        ctx.fillStyle = '#020203';
+        ctx.beginPath();
+        ctx.moveTo(-310, 530);
+        ctx.quadraticCurveTo(-300, 230, -175, 130);
+        ctx.lineTo(-110, 50);
+        ctx.quadraticCurveTo(-150, -100, -76, -245);
+        ctx.lineTo(-135, -430);
+        ctx.quadraticCurveTo(-62, -385, -33, -290);
+        ctx.quadraticCurveTo(0, -318, 33, -290);
+        ctx.quadraticCurveTo(62, -385, 135, -430);
+        ctx.lineTo(76, -245);
+        ctx.quadraticCurveTo(150, -100, 110, 50);
+        ctx.lineTo(175, 130);
+        ctx.quadraticCurveTo(300, 230, 310, 530);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function getProcessedSubject() {
+        if (!state.subjectCanvas) return null;
+        if (state.processedCanvas &&
+            state.processedCanvas.dataset.edge === String(state.edge) &&
+            state.processedCanvas.dataset.softness === String(state.softness)) {
+          return state.processedCanvas;
+        }
+
+        const source = state.subjectCanvas;
+        const out = document.createElement('canvas');
+        out.width = source.width;
+        out.height = source.height;
+        const outCtx = out.getContext('2d', { willReadFrequently: true });
+        outCtx.drawImage(source, 0, 0);
+        const data = outCtx.getImageData(0, 0, out.width, out.height);
+        const low = state.edge - state.softness;
+        const high = state.edge + state.softness;
+        for (let i = 3; i < data.data.length; i += 4) {
+          data.data[i] = Math.round(255 * smoothstep(low, high, data.data[i]));
+        }
+        outCtx.putImageData(data, 0, 0);
+        out.dataset.edge = String(state.edge);
+        out.dataset.softness = String(state.softness);
+        state.processedCanvas = out;
+        return out;
+      }
+
+      function getSubjectRect() {
+        const subject = state.subjectCanvas;
+        const ratio = subject ? subject.width / subject.height : .55;
+        const height = state.baseHeight * state.scale;
+        const width = height * ratio;
+        return {
+          x: W / 2 + state.offsetX - width / 2,
+          y: 620 + state.offsetY,
+          width,
+          height,
+        };
+      }
+
+      function buildSilhouetteLayer(rect) {
+        const layer = document.createElement('canvas');
+        layer.width = W;
+        layer.height = H;
+        const layerCtx = layer.getContext('2d');
+        const subject = getProcessedSubject();
+        layerCtx.drawImage(subject, rect.x, rect.y, rect.width, rect.height);
+        layerCtx.globalCompositeOperation = 'source-in';
+        layerCtx.fillStyle = state.variant === 'shadow' ? '#010102' : '#020203';
+        layerCtx.fillRect(0, 0, W, H);
+
+        if (state.variant === 'veiled') {
+          layerCtx.globalCompositeOperation = 'destination-out';
+          const fade = layerCtx.createLinearGradient(0, 1040, 0, 1570);
+          fade.addColorStop(0, 'rgba(0,0,0,0)');
+          fade.addColorStop(.55, 'rgba(0,0,0,.18)');
+          fade.addColorStop(1, 'rgba(0,0,0,.9)');
+          layerCtx.fillStyle = fade;
+          layerCtx.fillRect(0, 1000, W, 650);
+        }
+        return layer;
+      }
+
+      function drawEyes(rect) {
+        if (!state.eyes || !state.ready) return;
+        const centerX = rect.x + rect.width / 2 + state.eyeX;
+        const baseY = rect.y + rect.height * state.eyeY;
+        const gap = rect.width * state.eyeGap;
+        const baseSize = clamp(rect.width * .018, 2.5, 45);
+
+        const drawSingleEye = (x, y, sizeScale, intensity, color) => {
+          // Null bedeutet wirklich aus: weder Glühnebel noch heller Kern werden gezeichnet.
+          if (intensity <= 0) return;
+          const size = clamp(baseSize * sizeScale, 1.5, 70);
+          const strength = clamp(intensity, 0, 2);
+          const opacity = clamp(strength, 0, 1);
+          const rgb = hexToRgb(color);
+          const outerWidth = size * (4.2 + strength * 2.6);
+          const outerHeight = size * (1.8 + strength * .9);
+
+          ctx.save();
+          ctx.globalCompositeOperation = 'screen';
+          ctx.globalAlpha = opacity;
+          const glow = ctx.createRadialGradient(x, y, 0, x, y, outerWidth);
+          glow.addColorStop(0, `rgba(255,255,255,${clamp(.72 + strength * .18, 0, 1)})`);
+          glow.addColorStop(.12, `rgba(${mix(rgb.r, 255, .35)},${mix(rgb.g, 255, .35)},${mix(rgb.b, 255, .35)},${clamp(.65 + strength * .2, 0, 1)})`);
+          glow.addColorStop(.4, `rgba(${rgb.r},${rgb.g},${rgb.b},${clamp(.18 + strength * .34, 0, .94)})`);
+          glow.addColorStop(1, `rgba(${rgb.r},${rgb.g},${rgb.b},0)`);
+          ctx.fillStyle = glow;
+          ctx.beginPath();
+          ctx.ellipse(x, y, outerWidth, outerHeight, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.shadowColor = color;
+          ctx.shadowBlur = size * (1.5 + strength * 3.5);
+          ctx.fillStyle = `rgb(${mix(rgb.r, 255, .7)},${mix(rgb.g, 255, .7)},${mix(rgb.b, 255, .7)})`;
+          ctx.beginPath();
+          ctx.ellipse(x, y, size * 1.22, size * .5, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        };
+
+        drawSingleEye(
+          centerX - gap / 2 + state.leftEyeX,
+          baseY + state.leftEyeY,
+          state.leftEyeSize,
+          state.leftEyeGlow,
+          state.leftEyeColor,
+        );
+        drawSingleEye(
+          centerX + gap / 2 + state.rightEyeX,
+          baseY + state.rightEyeY,
+          state.rightEyeSize,
+          state.rightEyeGlow,
+          state.rightEyeColor,
+        );
+      }
+
+      function mix(a, b, amount) {
+        return Math.round(a + (b - a) * amount);
+      }
+
+      function hexToRgb(hex) {
+        const clean = String(hex).replace('#', '');
+        const normalized = clean.length === 3
+          ? clean.split('').map(char => char + char).join('')
+          : clean.padEnd(6, '0').slice(0, 6);
+        const value = parseInt(normalized, 16);
+        return {
+          r: (value >> 16) & 255,
+          g: (value >> 8) & 255,
+          b: value & 255,
+        };
+      }
+
+      function drawSubject() {
+        if (!state.ready || !state.subjectCanvas) {
+          drawPlaceholderSilhouette();
+          return null;
+        }
+        const rect = getSubjectRect();
+        const layer = buildSilhouetteLayer(rect);
+        const config = variantConfig[state.variant];
+
+        ctx.save();
+        ctx.globalAlpha = .28 + state.glow * .66;
+        ctx.shadowColor = config.glow;
+        ctx.shadowBlur = state.variant === 'shadow' ? 18 * state.glow : 54 * state.glow;
+        ctx.drawImage(layer, 0, 0);
+        ctx.restore();
+
+        if (state.variant === 'eclipse') {
+          ctx.save();
+          ctx.globalAlpha = .48 * state.glow;
+          ctx.shadowColor = '#f0c673';
+          ctx.shadowBlur = 22;
+          ctx.drawImage(layer, 0, 0);
+          ctx.restore();
+        }
+
+        ctx.drawImage(layer, 0, 0);
+        drawEyes(rect);
+        return rect;
+      }
+
+      function drawFog() {
+        if (state.variant !== 'veiled') return;
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        for (let i = 0; i < 7; i++) {
+          const x = 90 + i * 165;
+          const y = 1230 + (i % 3) * 66;
+          const fog = ctx.createRadialGradient(x, y, 10, x, y, 260);
+          fog.addColorStop(0, 'rgba(118, 78, 176, .18)');
+          fog.addColorStop(.55, 'rgba(88, 61, 126, .08)');
+          fog.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = fog;
+          ctx.fillRect(x - 280, y - 160, 560, 320);
+        }
+        ctx.restore();
+      }
+
+      function sectorPath(cx, cy, innerR, outerR, start, end) {
+        ctx.beginPath();
+        ctx.arc(cx, cy, outerR, start, end);
+        ctx.arc(cx, cy, innerR, end, start, true);
+        ctx.closePath();
+      }
+
+      function drawPremiumWheel(config) {
+        if (!premiumAssets.wheel) return false;
+        const wheel = premiumAssets.wheel;
+        const width = config.wheelR * 2 * state.wheelScale;
+        const height = width * wheel.height / wheel.width;
+        const x = W / 2 - width / 2;
+        const y = config.wheelY - height / 2;
+
+        ctx.save();
+        ctx.shadowColor = 'rgba(86, 45, 142, .68)';
+        ctx.shadowBlur = 44 * state.glow;
+        ctx.drawImage(wheel, x, y, width, height);
+        ctx.restore();
+
+        ctx.save();
+        ctx.globalAlpha = .92;
+        ctx.drawImage(wheel, x, y, width, height);
+        ctx.restore();
+        return true;
+      }
+
+      function drawWheel(config) {
+        if (drawPremiumWheel(config)) return;
+        const cx = W / 2;
+        const cy = config.wheelY;
+        const outerR = config.wheelR * state.wheelScale;
+        const innerR = outerR * .245;
+        const startAngle = Math.PI;
+        const totalAngle = Math.PI;
+        let cursor = startAngle;
+
+        ctx.save();
+        ctx.shadowColor = 'rgba(130, 80, 205, .38)';
+        ctx.shadowBlur = 44 * state.glow;
+        ctx.fillStyle = '#111015';
+        ctx.beginPath();
+        ctx.arc(cx, cy, outerR + 28, Math.PI, Math.PI * 2);
+        ctx.lineTo(cx + outerR + 28, cy + 80);
+        ctx.lineTo(cx - outerR - 28, cy + 80);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+
+        palette.forEach((item, index) => {
+          const span = totalAngle * item.weight;
+          const end = cursor + span;
+          const gradient = ctx.createRadialGradient(cx, cy, innerR, cx, cy, outerR);
+          gradient.addColorStop(0, shadeColor(item.color, 26));
+          gradient.addColorStop(.68, item.color);
+          gradient.addColorStop(1, shadeColor(item.color, -30));
+          sectorPath(cx, cy, innerR, outerR, cursor, end);
+          ctx.fillStyle = gradient;
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(10, 9, 12, .72)';
+          ctx.lineWidth = 6;
+          ctx.stroke();
+
+          const subdivisions = index < 2 ? 5 : index === 2 ? 4 : 2;
+          ctx.save();
+          ctx.strokeStyle = 'rgba(15, 13, 17, .34)';
+          ctx.lineWidth = 2;
+          for (let s = 1; s < subdivisions; s++) {
+            const a = lerp(cursor, end, s / subdivisions);
+            ctx.beginPath();
+            ctx.moveTo(cx + Math.cos(a) * innerR, cy + Math.sin(a) * innerR);
+            ctx.lineTo(cx + Math.cos(a) * outerR, cy + Math.sin(a) * outerR);
+            ctx.stroke();
+          }
+          ctx.restore();
+          cursor = end;
+        });
+
+        const rim = ctx.createLinearGradient(cx - outerR, cy - outerR, cx + outerR, cy);
+        rim.addColorStop(0, '#29262b');
+        rim.addColorStop(.38, '#b08b46');
+        rim.addColorStop(.55, '#4a3a27');
+        rim.addColorStop(.75, '#d2ad61');
+        rim.addColorStop(1, '#27242a');
+        ctx.strokeStyle = rim;
+        ctx.lineWidth = 19;
+        ctx.beginPath();
+        ctx.arc(cx, cy, outerR + 7, Math.PI, Math.PI * 2);
+        ctx.stroke();
+        ctx.strokeStyle = '#0a090b';
+        ctx.lineWidth = 9;
+        ctx.beginPath();
+        ctx.arc(cx, cy, outerR - 14, Math.PI, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.strokeStyle = 'rgba(224, 192, 121, .48)';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(cx, cy, innerR, Math.PI, Math.PI * 2);
+        ctx.stroke();
+
+        const topY = cy - outerR - 15;
+        ctx.save();
+        ctx.translate(cx, topY);
+        ctx.shadowColor = config.accent;
+        ctx.shadowBlur = 20 * state.glow;
+        ctx.fillStyle = '#161319';
+        ctx.strokeStyle = config.accent;
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(0, -54);
+        ctx.lineTo(28, 0);
+        ctx.lineTo(0, 47);
+        ctx.lineTo(-28, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = config.accent;
+        ctx.beginPath();
+        ctx.moveTo(0, -25);
+        ctx.lineTo(10, 0);
+        ctx.lineTo(0, 20);
+        ctx.lineTo(-10, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function shadeColor(hex, amount) {
+        const n = parseInt(hex.slice(1), 16);
+        const r = clamp((n >> 16) + amount, 0, 255);
+        const g = clamp(((n >> 8) & 255) + amount, 0, 255);
+        const b = clamp((n & 255) + amount, 0, 255);
+        return `rgb(${r}, ${g}, ${b})`;
+      }
+
+      function drawHeader(config) {
+        ctx.save();
+        ctx.textBaseline = 'alphabetic';
+        const gold = ctx.createLinearGradient(0, 410, 0, 610);
+        gold.addColorStop(0, '#fff0bf');
+        gold.addColorStop(.42, '#d6b667');
+        gold.addColorStop(1, '#84632d');
+        ctx.fillStyle = gold;
+        ctx.shadowColor = 'rgba(0,0,0,.86)';
+        ctx.shadowBlur = 18;
+        ctx.font = '600 68px Cinzel, Georgia, serif';
+        drawSpacedText(ctx, 'WHEEL OF ORIGIN', W / 2, 490, 4.2);
+        ctx.font = '600 34px Cinzel, Georgia, serif';
+        drawSpacedText(ctx, 'SEASON 2', W / 2, 553, 10);
+
+        const lineY = 546;
+        const lineGradient = ctx.createLinearGradient(160, 0, 920, 0);
+        lineGradient.addColorStop(0, 'rgba(216,183,107,0)');
+        lineGradient.addColorStop(.5, 'rgba(216,183,107,.62)');
+        lineGradient.addColorStop(1, 'rgba(216,183,107,0)');
+        ctx.strokeStyle = lineGradient;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(135, lineY);
+        ctx.lineTo(360, lineY);
+        ctx.moveTo(720, lineY);
+        ctx.lineTo(945, lineY);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function draw() {
+        const config = variantConfig[state.variant];
+        ctx.clearRect(0, 0, W, H);
+        drawBackground(config);
+        drawArcaneRing(config);
+        drawSubject();
+        drawFog();
+        drawWheel(config);
+        drawHeader(config);
+      }
+
+      async function cropToAlpha(image) {
+        const maxSide = 1800;
+        const ratio = Math.min(1, maxSide / Math.max(image.naturalWidth || image.width, image.naturalHeight || image.height));
+        const width = Math.max(1, Math.round((image.naturalWidth || image.width) * ratio));
+        const height = Math.max(1, Math.round((image.naturalHeight || image.height) * ratio));
+        const source = document.createElement('canvas');
+        source.width = width;
+        source.height = height;
+        const sourceCtx = source.getContext('2d', { willReadFrequently: true });
+        sourceCtx.drawImage(image, 0, 0, width, height);
+        const imageData = sourceCtx.getImageData(0, 0, width, height);
+
+        let minX = width;
+        let minY = height;
+        let maxX = -1;
+        let maxY = -1;
+        let transparentPixels = 0;
+        const data = imageData.data;
+        for (let y = 0; y < height; y++) {
+          for (let x = 0; x < width; x++) {
+            const alpha = data[(y * width + x) * 4 + 3];
+            if (alpha < 248) transparentPixels++;
+            if (alpha > 8) {
+              if (x < minX) minX = x;
+              if (y < minY) minY = y;
+              if (x > maxX) maxX = x;
+              if (y > maxY) maxY = y;
+            }
+          }
+        }
+
+        const hasTransparency = transparentPixels > width * height * .002;
+        if (!hasTransparency || maxX < minX || maxY < minY) {
+          return { canvas: source, hasTransparency: false };
+        }
+
+        const padding = Math.max(4, Math.round(Math.max(width, height) * .008));
+        minX = Math.max(0, minX - padding);
+        minY = Math.max(0, minY - padding);
+        maxX = Math.min(width - 1, maxX + padding);
+        maxY = Math.min(height - 1, maxY + padding);
+        const cropped = document.createElement('canvas');
+        cropped.width = maxX - minX + 1;
+        cropped.height = maxY - minY + 1;
+        cropped.getContext('2d').drawImage(source, minX, minY, cropped.width, cropped.height, 0, 0, cropped.width, cropped.height);
+        return { canvas: cropped, hasTransparency: true };
+      }
+
+      async function setSubjectFromImage(image, requireTransparency = true) {
+        const result = await cropToAlpha(image);
+        if (requireTransparency && !result.hasTransparency) return false;
+        state.subjectCanvas = result.canvas;
+        state.processedCanvas = null;
+        state.ready = true;
+        applyFocus('full');
+        els.emptyNote.classList.add('hidden');
+        els.exportBtn.disabled = false;
+        draw();
+        return true;
+      }
+
+      async function handleFile(file) {
+        if (!file || !/^image\/(png|jpeg|webp)$/.test(file.type)) {
+          setStatus('Bitte lade ein JPG-, PNG- oder WebP-Bild hoch.', 'error');
+          return;
+        }
+        state.sourceFile = file;
+        state.ready = false;
+        state.subjectCanvas = null;
+        state.processedCanvas = null;
+        els.exportBtn.disabled = true;
+        els.fileName.textContent = file.name;
+        setStatus('Bild wird geprüft …', 'busy', 12);
+        draw();
+
+        try {
+          const url = URL.createObjectURL(file);
+          const image = await loadImage(url);
+          state.sourceImage = image;
+          const accepted = await setSubjectFromImage(image, true);
+          URL.revokeObjectURL(url);
+          if (accepted) {
+            els.removeBgBtn.disabled = true;
+            setStatus('Transparentes Bild erkannt – die Silhouette ist bereit.', 'success');
+          } else {
+            state.ready = false;
+            state.subjectCanvas = null;
+            els.emptyNote.classList.remove('hidden');
+            els.removeBgBtn.disabled = false;
+            setStatus('Das Bild hat einen Hintergrund. Klicke jetzt auf „Automatisch freistellen“.', 'idle');
+            draw();
+          }
+        } catch (error) {
+          setStatus(error.message || 'Das Bild konnte nicht geladen werden.', 'error');
+          els.removeBgBtn.disabled = true;
+        }
+      }
+
+      function progressFromKey(key, current, total) {
+        if (key.startsWith('fetch')) {
+          const p = total ? current / total : 0;
+          return 8 + p * 46;
+        }
+        if (key.includes('decode')) return 58;
+        if (key.includes('inference')) return 72;
+        if (key.includes('mask')) return 88;
+        if (key.includes('encode')) return current >= total ? 98 : 92;
+        return 12;
+      }
+
+      async function removeBackgroundAutomatically() {
+        if (!state.sourceFile || state.processing) return;
+        state.processing = true;
+        els.removeBgBtn.disabled = true;
+        els.fileInput.disabled = true;
+        setStatus('Freistellungsmodell wird geladen …', 'busy', 5);
+
+        try {
+          const module = await import('https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.7.0/+esm');
+          setStatus('Charakter wird erkannt und freigestellt …', 'busy', 12);
+          const outputBlob = await module.removeBackground(state.sourceFile, {
+            model: 'isnet_quint8',
+            device: 'cpu',
+            proxyToWorker: false,
+            output: { format: 'image/png', quality: 1, type: 'foreground' },
+            progress: (key, current, total) => {
+              const p = progressFromKey(String(key), Number(current), Number(total));
+              setStatus('Charakter wird erkannt und freigestellt …', 'busy', p);
+            },
+          });
+          const outputUrl = URL.createObjectURL(outputBlob);
+          const image = await loadImage(outputUrl);
+          const ok = await setSubjectFromImage(image, true);
+          URL.revokeObjectURL(outputUrl);
+          if (!ok) throw new Error('Die automatische Freistellung hat keine transparente Figur erzeugt.');
+          setStatus('Fertig – der Charakter wurde automatisch freigestellt.', 'success');
+        } catch (error) {
+          console.error(error);
+          els.removeBgBtn.disabled = false;
+          setStatus('Freistellung fehlgeschlagen. Öffne die Datei in Chrome oder Edge mit Internet – alternativ kannst du ein transparentes PNG laden.', 'error');
+        } finally {
+          state.processing = false;
+          els.fileInput.disabled = false;
+        }
+      }
+
+      function applyFocus(focus) {
+        if (focus === 'full') {
+          state.baseHeight = 1300;
+          state.scale = 1;
+          state.offsetX = 0;
+          state.offsetY = 20;
+        } else if (focus === 'bust') {
+          state.baseHeight = 1840;
+          state.scale = 1;
+          state.offsetX = 0;
+          state.offsetY = 110;
+        } else {
+          state.baseHeight = 2450;
+          state.scale = 1;
+          state.offsetX = 0;
+          state.offsetY = 245;
+        }
+        syncControls();
+        draw();
+      }
+
+      function syncControls() {
+        els.scaleRange.value = Math.round(state.scale * 100);
+        els.xRange.value = Math.round(state.offsetX);
+        els.yRange.value = Math.round(state.offsetY);
+        els.edgeRange.value = state.edge;
+        els.softRange.value = state.softness;
+        els.glowRange.value = Math.round(state.glow * 100);
+        els.wheelRange.value = Math.round(state.wheelScale * 100);
+        els.eyesToggle.checked = state.eyes;
+        els.eyeXRange.value = state.eyeX;
+        els.eyeYRange.value = Math.round(state.eyeY * 100);
+        els.eyeGapRange.value = Math.round(state.eyeGap * 100);
+        els.leftEyeXRange.value = state.leftEyeX;
+        els.leftEyeYRange.value = state.leftEyeY;
+        els.leftEyeSizeRange.value = Math.round(state.leftEyeSize * 100);
+        els.leftEyeGlowRange.value = Math.round(state.leftEyeGlow * 100);
+        els.leftEyeColorInput.value = state.leftEyeColor;
+        els.rightEyeXRange.value = state.rightEyeX;
+        els.rightEyeYRange.value = state.rightEyeY;
+        els.rightEyeSizeRange.value = Math.round(state.rightEyeSize * 100);
+        els.rightEyeGlowRange.value = Math.round(state.rightEyeGlow * 100);
+        els.rightEyeColorInput.value = state.rightEyeColor;
+        document.getElementById('scaleValue').textContent = `${Math.round(state.scale * 100)}%`;
+        document.getElementById('xValue').textContent = Math.round(state.offsetX);
+        document.getElementById('yValue').textContent = Math.round(state.offsetY);
+        document.getElementById('edgeValue').textContent = state.edge;
+        document.getElementById('softValue').textContent = state.softness;
+        document.getElementById('glowValue').textContent = `${Math.round(state.glow * 100)}%`;
+        document.getElementById('wheelValue').textContent = `${Math.round(state.wheelScale * 100)}%`;
+        document.getElementById('eyeXValue').textContent = Math.round(state.eyeX);
+        document.getElementById('eyeYValue').textContent = `${Math.round(state.eyeY * 100)}%`;
+        document.getElementById('eyeGapValue').textContent = `${Math.round(state.eyeGap * 100)}%`;
+        document.getElementById('leftEyeXValue').textContent = Math.round(state.leftEyeX);
+        document.getElementById('leftEyeYValue').textContent = Math.round(state.leftEyeY);
+        document.getElementById('leftEyeSizeValue').textContent = `${Math.round(state.leftEyeSize * 100)}%`;
+        document.getElementById('leftEyeGlowValue').textContent = `${Math.round(state.leftEyeGlow * 100)}%`;
+        document.getElementById('leftEyeColorValue').textContent = state.leftEyeColor.toUpperCase();
+        document.getElementById('rightEyeXValue').textContent = Math.round(state.rightEyeX);
+        document.getElementById('rightEyeYValue').textContent = Math.round(state.rightEyeY);
+        document.getElementById('rightEyeSizeValue').textContent = `${Math.round(state.rightEyeSize * 100)}%`;
+        document.getElementById('rightEyeGlowValue').textContent = `${Math.round(state.rightEyeGlow * 100)}%`;
+        document.getElementById('rightEyeColorValue').textContent = state.rightEyeColor.toUpperCase();
+        document.querySelectorAll('[data-eye-color]').forEach(button => {
+          const currentColor = button.dataset.eye === 'left' ? state.leftEyeColor : state.rightEyeColor;
+          button.classList.toggle('active', button.dataset.eyeColor.toLowerCase() === currentColor.toLowerCase());
+        });
+        els.canvasShell.classList.toggle('profile-square', state.preview === 'square');
+        els.canvasShell.classList.toggle('profile-tall', state.preview === 'tall');
+        els.canvasShell.classList.toggle('cover-preview', state.preview === 'cover');
+        els.previewBadge.textContent = state.preview === 'square'
+          ? 'Profilraster · 1:1 Vorschau'
+          : state.preview === 'tall'
+            ? 'Profilraster · 3:4 Vorschau'
+            : 'Komplettes TikTok-Cover · 9:16';
+        document.querySelectorAll('[data-preview]').forEach(button => {
+          const active = button.dataset.preview === state.preview;
+          button.classList.toggle('active', active);
+          button.setAttribute('aria-pressed', String(active));
+        });
+        els.eyeControls.classList.toggle('visible', state.eyes);
+      }
+
+      function resetAll() {
+        state.sourceFile = null;
+        state.sourceImage = null;
+        state.subjectCanvas = null;
+        state.processedCanvas = null;
+        state.ready = false;
+        state.scale = 1;
+        state.offsetX = 0;
+        state.offsetY = 0;
+        els.fileInput.value = '';
+        els.fileName.textContent = '';
+        els.removeBgBtn.disabled = true;
+        els.exportBtn.disabled = true;
+        els.emptyNote.classList.remove('hidden');
+        setStatus('Lade ein Bild hoch. Transparente PNGs werden sofort erkannt.', 'idle');
+        syncControls();
+        draw();
+      }
+
+      function bindRange(element, onInput) {
+        element.addEventListener('input', () => {
+          onInput(Number(element.value));
+          syncControls();
+          draw();
+        });
+      }
+
+      bindRange(els.scaleRange, value => state.scale = value / 100);
+      bindRange(els.xRange, value => state.offsetX = value);
+      bindRange(els.yRange, value => state.offsetY = value);
+      bindRange(els.edgeRange, value => { state.edge = value; state.processedCanvas = null; });
+      bindRange(els.softRange, value => { state.softness = value; state.processedCanvas = null; });
+      bindRange(els.glowRange, value => state.glow = value / 100);
+      bindRange(els.wheelRange, value => state.wheelScale = value / 100);
+      bindRange(els.eyeXRange, value => state.eyeX = value);
+      bindRange(els.eyeYRange, value => state.eyeY = value / 100);
+      bindRange(els.eyeGapRange, value => state.eyeGap = value / 100);
+      bindRange(els.leftEyeXRange, value => state.leftEyeX = value);
+      bindRange(els.leftEyeYRange, value => state.leftEyeY = value);
+      bindRange(els.leftEyeSizeRange, value => state.leftEyeSize = value / 100);
+      bindRange(els.leftEyeGlowRange, value => state.leftEyeGlow = value / 100);
+      bindRange(els.rightEyeXRange, value => state.rightEyeX = value);
+      bindRange(els.rightEyeYRange, value => state.rightEyeY = value);
+      bindRange(els.rightEyeSizeRange, value => state.rightEyeSize = value / 100);
+      bindRange(els.rightEyeGlowRange, value => state.rightEyeGlow = value / 100);
+
+      els.leftEyeColorInput.addEventListener('input', () => {
+        state.leftEyeColor = els.leftEyeColorInput.value;
+        syncControls();
+        draw();
+      });
+
+      els.rightEyeColorInput.addEventListener('input', () => {
+        state.rightEyeColor = els.rightEyeColorInput.value;
+        syncControls();
+        draw();
+      });
+
+      document.querySelectorAll('[data-eye-color]').forEach(button => {
+        button.addEventListener('click', () => {
+          if (button.dataset.eye === 'left') state.leftEyeColor = button.dataset.eyeColor;
+          else state.rightEyeColor = button.dataset.eyeColor;
+          syncControls();
+          draw();
+        });
+      });
+
+      document.querySelectorAll('[data-preview]').forEach(button => {
+        button.addEventListener('click', () => {
+          state.preview = button.dataset.preview;
+          syncControls();
+        });
+      });
+
+      els.eyesToggle.addEventListener('change', () => {
+        state.eyes = els.eyesToggle.checked;
+        syncControls();
+        draw();
+      });
+
+      document.querySelectorAll('[data-focus]').forEach(button => {
+        button.addEventListener('click', () => applyFocus(button.dataset.focus));
+      });
+
+      document.querySelectorAll('[data-variant]').forEach(button => {
+        button.addEventListener('click', () => {
+          document.querySelectorAll('[data-variant]').forEach(item => item.classList.remove('active'));
+          button.classList.add('active');
+          state.variant = button.dataset.variant;
+          if (state.variant === 'eyes') state.eyes = true;
+          syncControls();
+          draw();
+        });
+      });
+
+      els.fileInput.addEventListener('change', event => handleFile(event.target.files[0]));
+      els.removeBgBtn.addEventListener('click', removeBackgroundAutomatically);
+      els.resetAllBtn.addEventListener('click', resetAll);
+      els.resetPositionBtn.addEventListener('click', () => applyFocus('full'));
+
+      ['dragenter', 'dragover'].forEach(type => {
+        els.dropZone.addEventListener(type, event => {
+          event.preventDefault();
+          els.dropZone.classList.add('dragover');
+        });
+      });
+      ['dragleave', 'drop'].forEach(type => {
+        els.dropZone.addEventListener(type, event => {
+          event.preventDefault();
+          els.dropZone.classList.remove('dragover');
+        });
+      });
+      els.dropZone.addEventListener('drop', event => handleFile(event.dataTransfer.files[0]));
+
+      let dragging = false;
+      let lastPointer = null;
+
+      canvas.addEventListener('pointerdown', event => {
+        if (!state.ready) return;
+        dragging = true;
+        lastPointer = { x: event.clientX, y: event.clientY };
+        canvas.setPointerCapture(event.pointerId);
+        canvas.classList.add('dragging');
+      });
+
+      canvas.addEventListener('pointermove', event => {
+        if (!dragging || !lastPointer) return;
+        const rect = canvas.getBoundingClientRect();
+        state.offsetX = clamp(state.offsetX + (event.clientX - lastPointer.x) * W / rect.width, -540, 540);
+        state.offsetY = clamp(state.offsetY + (event.clientY - lastPointer.y) * H / rect.height, -700, 700);
+        lastPointer = { x: event.clientX, y: event.clientY };
+        syncControls();
+        draw();
+      });
+
+      const endDrag = () => {
+        dragging = false;
+        lastPointer = null;
+        canvas.classList.remove('dragging');
+      };
+      canvas.addEventListener('pointerup', endDrag);
+      canvas.addEventListener('pointercancel', endDrag);
+
+      canvas.addEventListener('wheel', event => {
+        if (!state.ready) return;
+        event.preventDefault();
+        state.scale = clamp(state.scale * (event.deltaY > 0 ? .94 : 1.06), .45, 2.4);
+        syncControls();
+        draw();
+      }, { passive: false });
+
+      window.addEventListener('keydown', event => {
+        if (!state.ready || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
+        if (['INPUT', 'BUTTON'].includes(document.activeElement.tagName)) return;
+        event.preventDefault();
+        const step = event.shiftKey ? 24 : 5;
+        if (event.key === 'ArrowLeft') state.offsetX -= step;
+        if (event.key === 'ArrowRight') state.offsetX += step;
+        if (event.key === 'ArrowUp') state.offsetY -= step;
+        if (event.key === 'ArrowDown') state.offsetY += step;
+        state.offsetX = clamp(state.offsetX, -540, 540);
+        state.offsetY = clamp(state.offsetY, -700, 700);
+        syncControls();
+        draw();
+      });
+
+      els.exportBtn.addEventListener('click', () => {
+        if (!state.ready) return;
+        draw();
+        canvas.toBlob(blob => {
+          if (!blob) return;
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          const safeName = (state.sourceFile?.name || 'character').replace(/\.[^.]+$/, '').replace(/[^a-z0-9_-]+/gi, '-');
+          link.href = url;
+          link.download = `wheel-of-origin-s2-${safeName}-${state.variant}.png`;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }, 'image/png');
+      });
+
+      loadPremiumAssets();
+      document.fonts?.ready.then(draw);
+      syncControls();
+      draw();
+    })();
+  </script>
+</body>
+</html>
